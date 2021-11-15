@@ -149,15 +149,54 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     Which value for each distribution is updated depends on whether
     the person is in `have_gene` and `have_trait`, respectively.
     """
-    raise NotImplementedError
 
+def getGene(person ,one_gene, two_gene ):
+    """Return the number of genes the person has
+
+    Args:
+        person : human
+        one_gene (List): list of people with one copy of gene
+        two_gene (List): list of people with two copy of gene
+
+    Returns:
+        Int: the number associated with the gene
+    """
+    return 1 if person in one_gene else 2 if person in two_gene else 0
+
+def inherit(parent_gene, trait):
+    """Returns the odds of inheriting a gene
+
+    Args:
+        parent_gene (Int): 0, 1, or 2 depending on how many copy of genes the parent has
+        trait (Bool): Does the parent 
+
+    Returns:
+        [type]: [description]
+    """
+    if parent_gene == 0:
+        return  PROBS["mutation"] if trait else 1 - PROBS["mutation"]
+    elif parent_gene == 1:
+        return  .5
+    elif parent_gene == 2:
+        return  1- PROBS["mutation"] if trait else PROBS["mutation"]
 
 def normalize(probabilities):
     """
     Update `probabilities` such that each probability distribution
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
-    raise NotImplementedError
+    for person in probabilities:
+
+        #--Get sums of trait/gene probabilities:
+        sum_gene = sum(probabilities[person]["gene"].values())
+        sum_trait = sum(probabilities[person]["trait"].values())
+        #
+        #--Normalize by getting proportion of each (divide part by whole to get a decimal):
+        for trait in probabilities[person]["trait"]:
+            probabilities[person]["trait"][trait] = probabilities[person]["trait"][trait] / sum_trait
+        #
+        for gene in probabilities[person]["gene"]:
+            probabilities[person]["gene"][gene] = probabilities[person]["gene"][gene] / sum_gene
 
 
 if __name__ == "__main__":
