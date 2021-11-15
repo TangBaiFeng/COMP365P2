@@ -139,7 +139,19 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    raise NotImplementedError
+    probability = 1
+    for person in people:
+        mom = people[person]['mother']
+        dad = people[person]['father']
+        personTrait = True if person in have_trait else False
+        personGene = getGene(person, one_gene, two_genes)
+
+
+
+        #
+        if dad is None and mom is None:
+            probability *= PROBS["trait"][personGene][personTrait] * PROBS["gene"][personGene]
+
 
 
 def update(probabilities, one_gene, two_genes, have_trait, p):
@@ -168,7 +180,7 @@ def inherit(parent_gene, trait):
 
     Args:
         parent_gene (Int): 0, 1, or 2 depending on how many copy of genes the parent has
-        trait (Bool): Does the parent 
+        trait (Bool): Does the parent show the trait
 
     Returns:
         [type]: [description]
