@@ -139,34 +139,37 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         * everyone in set `have_trait` has the trait, and
         * everyone not in set` have_trait` does not have the trait.
     """
-    probability = 1
+    probability = 1.0
     for person in people:
         mom = people[person]['mother']
         dad = people[person]['father']
         personTrait = True if person in have_trait else False
         personGene = getGene(person, one_gene, two_genes)
+        probability *= PROBS["trait"][personTrait][personTrait]
 
-
-
-        #
+        
         if dad is None and mom is None:
             probability *= PROBS["trait"][personGene][personTrait] * PROBS["gene"][personGene]
+        else:
+            mom_genes = getGene(mom, one_gene, two_genes)
+            dad_genes = getGene(dad, one_gene, two_genes)
+
+            if personGene == 0:
+                probability *= inherit(mom_genes, False) * inherit(dad_genes, False)
+            elif personGene == 1:
+                probability *= (inherit(mom_genes, True) * inherit(dad_genes, False) + inherit(mom_genes, False) * inherit(dad_genes, True))
+            elif personGene == 2:
+                probability *= inherit(mom_genes, True) * inherit(dad_genes, True)
+
+    return probability
 
 
-
-def update(probabilities, one_gene, two_genes, have_trait, p):
-    """
-    Add to `probabilities` a new joint probability `p`.
-    Each person should have their "gene" and "trait" distributions updated.
-    Which value for each distribution is updated depends on whether
-    the person is in `have_gene` and `have_trait`, respectively.
-    """
 
 def getGene(person ,one_gene, two_gene ):
     """Return the number of genes the person has
 
     Args:
-        person : human
+        person : 
         one_gene (List): list of people with one copy of gene
         two_gene (List): list of people with two copy of gene
 
@@ -180,7 +183,7 @@ def inherit(parent_gene, trait):
 
     Args:
         parent_gene (Int): 0, 1, or 2 depending on how many copy of genes the parent has
-        trait (Bool): Does the parent show the trait
+        trait (Bool): Does the child show the trait
 
     Returns:
         [type]: [description]
@@ -188,9 +191,29 @@ def inherit(parent_gene, trait):
     if parent_gene == 0:
         return  PROBS["mutation"] if trait else 1 - PROBS["mutation"]
     elif parent_gene == 1:
-        return  .5
+        return  0.5
     elif parent_gene == 2:
         return  1- PROBS["mutation"] if trait else PROBS["mutation"]
+
+
+def update(probabilities, one_gene, two_genes, have_trait, p):
+    """
+    Add to `probabilities` a new joint probability `p`.
+    Each person should have their "gene" and "trait" distributions updated.
+    Which value for each distribution is updated depends on whether
+    the person is in `have_gene` and `have_trait`, respectively.
+    """
+
+    for person in probabilities:
+        #--How many genes does person have?
+        personGene = getGene(person, one_gene, two_genes)
+        #
+        #--Does person have trait expressed or not?
+        personTrait = True if person in have_trait else False
+        #
+        #--Update the trait & gene probability distributions:
+        probabilities[person]["gene"][personGene] += p
+        probabilities[person]["trait"][personTrait] += p
 
 def normalize(probabilities):
     """
@@ -198,15 +221,14 @@ def normalize(probabilities):
     is normalized (i.e., sums to 1, with relative proportions the same).
     """
     for person in probabilities:
-
-        #--Get sums of trait/gene probabilities:
+        # Summing each genes and traits
         sum_gene = sum(probabilities[person]["gene"].values())
         sum_trait = sum(probabilities[person]["trait"].values())
-        #
-        #--Normalize by getting proportion of each (divide part by whole to get a decimal):
+        
+        # Divide each entry by the sum to normalize it
         for trait in probabilities[person]["trait"]:
             probabilities[person]["trait"][trait] = probabilities[person]["trait"][trait] / sum_trait
-        #
+        
         for gene in probabilities[person]["gene"]:
             probabilities[person]["gene"][gene] = probabilities[person]["gene"][gene] / sum_gene
 
