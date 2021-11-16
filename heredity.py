@@ -204,13 +204,9 @@ def update(probabilities, one_gene, two_genes, have_trait, p):
     """
 
     for person in probabilities:
-        #--How many genes does person have?
-        personGene = getGene(person, one_gene, two_genes)
-        #
-        #--Does person have trait expressed or not?
+        personGene = getGene(person, one_gene, two_genes)        
         personTrait = True if person in have_trait else False
-        #
-        #--Update the trait & gene probability distributions:
+        
         probabilities[person]["gene"][personGene] += p
         probabilities[person]["trait"][personTrait] += p
 
