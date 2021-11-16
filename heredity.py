@@ -145,7 +145,6 @@ def joint_probability(people, one_gene, two_genes, have_trait):
         dad = people[person]['father']
         personTrait = True if person in have_trait else False
         personGene = getGene(person, one_gene, two_genes)
-        probability *= PROBS["trait"][personTrait][personTrait]
 
         
         if dad is None and mom is None:
@@ -160,7 +159,7 @@ def joint_probability(people, one_gene, two_genes, have_trait):
                 probability *= (inherit(mom_genes, True) * inherit(dad_genes, False) + inherit(mom_genes, False) * inherit(dad_genes, True))
             elif personGene == 2:
                 probability *= inherit(mom_genes, True) * inherit(dad_genes, True)
-
+            probability *= PROBS["trait"][personGene][personTrait]
     return probability
 
 
